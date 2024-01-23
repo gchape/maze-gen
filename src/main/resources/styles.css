@@ -1,0 +1,112 @@
+.root {
+    -fx-background-color: WHITE;
+    -fx-padding: 8px, 0px, 8px, 0px;
+    -fx-hgap: 8px;
+}
+
+.rectangle {
+    -fx-fill: TRANSPARENT;
+    -fx-stroke: BLUEVIOLET;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 12 2 4 2;
+    -fx-stroke-dash-offset: 6;
+    -fx-stroke-line-cap: butt;
+}
+
+.check-box {
+    -fx-font-family: Verdana;
+    -fx-font-size: 11px;
+    -fx-font-style: oblique;
+    -fx-text-fill: #3a6dcf;
+    -fx-font-weight: BOLD;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: grey;
+    -fx-border-radius: 3px;
+}
+
+.check-box:hover {
+    -fx-background-color: linear-gradient(to right, YELLOW, ORANGE);
+    -fx-border-style: dotted;
+    -fx-border-width: 1px;
+    -fx-background-radius: 50px;
+    -fx-border-radius: 60px;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #3a6dcf;
+}
+
+.vbox {
+    -fx-spacing: 10px;
+}
+
+.algorithms-vbox {
+    -fx-spacing: 8px;
+    -fx-padding: 20px 0px 0px 0px;
+}
+
+.label {
+    -fx-text-fill: RED;
+    -fx-font-size: 12px;
+    -fx-font-family: Verdana;
+    -fx-font-style: ITALIC;
+}
+
+.choice-box {
+    -fx-background-color: MEDIUMPURPLE;
+    -fx-mark-color: ORANGE;
+    -fx-pref-height: 15px;
+    -fx-pref-width: 100px;
+}
+
+.choice-box .menu-item:focused {
+    -fx-background-color: ORANGE;
+}
+
+.choice-box .menu {
+    -fx-background-color: transparent; /* Set background color to transparent */
+    -fx-padding: 0;
+}
+
+.choice-box .menu-item {
+    -fx-background-color: WHEAT;
+    -fx-background-radius: 0; /* Set background radius to zero */
+}
+
+.choice-box .menu-item .label {
+    -fx-background-color: transparent; /* Set background color of the label to transparent */
+}
+
+.choice-box:hover {
+    -fx-background-color: ORANGE;
+}
+
+.choice-box .context-menu .label {
+    -fx-font-style: NORMAL;
+    -fx-font-family: Verdana;
+    -fx-text-fill: BLACK;
+}
+
+.choice-box .label {
+    -fx-font-size: 12px;
+    -fx-font-style: NORMAL;
+    -fx-font-family: Verdana;
+    -fx-text-fill: WHITE;
+}
+
+.button {
+    -fx-background-color: #9400D3;
+    -fx-text-fill: white;
+    -fx-font-size: 12px
+}
+
+.button:hover {
+    -fx-background-color: ORANGE;
+}
