@@ -1,4 +1,4 @@
-package com.gen.maze;
+package com.gen.maze.app;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -24,7 +24,7 @@ public class View {
     private final Button algorithmBtnBinaryTree = new Button("\uD83C\uDF33 BinaryTree");
     private final Button algorithmBtnKruskal = new Button("\uD83C\uDF3F Kruskal's");
     private final Button algorithmBtnBacktracking = new Button("➰ Backtracking");
-    private final CheckBox animationCheckBox = new CheckBox("Animation");
+    private final CheckBox animationCheckBox = new CheckBox("On/Off");
 
     public View() {
         userControlsPane.getStyleClass().add("vbox");

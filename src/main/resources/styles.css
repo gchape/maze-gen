@@ -1,16 +1,42 @@
 .root {
-    -fx-background-color: WHITE;
+    -fx-background-color: transparent;
     -fx-padding: 8px, 0px, 8px, 0px;
     -fx-hgap: 8px;
 }
 
 .rectangle {
-    -fx-fill: TRANSPARENT;
-    -fx-stroke: BLUEVIOLET;
+    -fx-fill: transparent;
+    -fx-stroke: blueviolet;
     -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 12 2 4 2;
     -fx-stroke-dash-offset: 6;
     -fx-stroke-line-cap: butt;
+}
+
+.vbox {
+    -fx-spacing: 10px;
+}
+
+.algorithms-vbox {
+    -fx-spacing: 8px;
+    -fx-padding: 20px 0px 0px 0px;
+}
+
+.label {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+    -fx-font-family: Verdana;
+    -fx-font-style: italic;
+}
+
+.button {
+    -fx-background-color: #9400D3;
+    -fx-text-fill: white;
+    -fx-font-size: 12px
+}
+
+.button:hover {
+    -fx-background-color: orange;
 }
 
 .check-box {
@@ -31,8 +57,8 @@
     -fx-background-color: linear-gradient(to right, YELLOW, ORANGE);
     -fx-border-style: dotted;
     -fx-border-width: 1px;
-    -fx-background-radius: 50px;
-    -fx-border-radius: 60px;
+    -fx-background-radius: 30%;
+    -fx-border-color: transparent;
 }
 
 .check-box:selected .mark {
@@ -43,70 +69,32 @@
     -fx-background-color: #3a6dcf;
 }
 
-.vbox {
-    -fx-spacing: 10px;
-}
-
-.algorithms-vbox {
-    -fx-spacing: 8px;
-    -fx-padding: 20px 0px 0px 0px;
-}
-
-.label {
-    -fx-text-fill: RED;
-    -fx-font-size: 12px;
-    -fx-font-family: Verdana;
-    -fx-font-style: ITALIC;
-}
-
 .choice-box {
-    -fx-background-color: MEDIUMPURPLE;
-    -fx-mark-color: ORANGE;
-    -fx-pref-height: 15px;
-    -fx-pref-width: 100px;
-}
-
-.choice-box .menu-item:focused {
-    -fx-background-color: ORANGE;
-}
-
-.choice-box .menu {
-    -fx-background-color: transparent; /* Set background color to transparent */
-    -fx-padding: 0;
-}
-
-.choice-box .menu-item {
-    -fx-background-color: WHEAT;
-    -fx-background-radius: 0; /* Set background radius to zero */
-}
-
-.choice-box .menu-item .label {
-    -fx-background-color: transparent; /* Set background color of the label to transparent */
-}
-
-.choice-box:hover {
-    -fx-background-color: ORANGE;
-}
-
-.choice-box .context-menu .label {
-    -fx-font-style: NORMAL;
-    -fx-font-family: Verdana;
-    -fx-text-fill: BLACK;
+    -fx-background-color: mediumpurple;
+    -fx-pref-width: 80px;
 }
 
 .choice-box .label {
-    -fx-font-size: 12px;
-    -fx-font-style: NORMAL;
-    -fx-font-family: Verdana;
-    -fx-text-fill: WHITE;
-}
-
-.button {
-    -fx-background-color: #9400D3;
+    -fx-font-family: Consolas;
     -fx-text-fill: white;
-    -fx-font-size: 12px
+    -fx-font-style: normal;
+    -fx-font-size: 13px;
 }
 
-.button:hover {
-    -fx-background-color: ORANGE;
+.choice-box:hover {
+    -fx-background-color: orange;
+}
+
+.choice-box .menu-item .label {
+    -fx-text-fill: black;
+    -fx-font-style: italic;
+    -fx-font-size: 13px;
+}
+
+.choice-box .menu-item:hover {
+    -fx-background-color: orange;
+}
+
+.choice-box .context-menu {
+    -fx-background-color: wheat;
 }

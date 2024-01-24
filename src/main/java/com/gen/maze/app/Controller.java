@@ -1,4 +1,4 @@
-package com.gen.maze;
+package com.gen.maze.app;
 
 import com.gen.maze.data.Tree;
 import com.gen.maze.data.UF;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
+    private Thread algorithmThread;
     private final Model model;
     private final View view;
     private Rectangle blob;
@@ -43,6 +44,7 @@ public class Controller {
 
     private void drawMazeGrid(ObservableValue<? extends Number> o, Number _old, Number _new) {
         view.animationDisableProperty().bind(view.choiceBoxValueProperty().isNotEqualTo(20));
+        if (algorithmThread != null) algorithmThread.interrupt();
         view.animationCheckedProperty().set(false);
         view.disableAlgorithms(false);
         blob = null;
@@ -66,7 +68,7 @@ public class Controller {
         Button dynamicButton = (Button) mouseEvent.getSource();
 
         switch (dynamicButton.getId()) {
-            case "binaryTree" -> Thread.ofPlatform().start(new Task<Void>() {
+            case "binaryTree" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
                     view.disableAlgorithms(true);
@@ -75,7 +77,7 @@ public class Controller {
                 }
             });
 
-            case "backtracking" -> Thread.ofPlatform().start(new Task<Void>() {
+            case "backtracking" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
                     view.disableAlgorithms(true);
@@ -84,7 +86,7 @@ public class Controller {
                 }
             });
 
-            case "kruskal" -> Thread.ofPlatform().start(new Task<Void>() {
+            case "kruskal" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
                     view.disableAlgorithms(true);

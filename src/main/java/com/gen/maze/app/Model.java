@@ -1,4 +1,4 @@
-package com.gen.maze;
+package com.gen.maze.app;
 
 import com.gen.maze.data.Tree;
 import javafx.beans.property.SimpleIntegerProperty;

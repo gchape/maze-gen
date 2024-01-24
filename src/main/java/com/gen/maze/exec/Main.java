@@ -1,6 +1,6 @@
 package com.gen.maze.exec;
 
-import com.gen.maze.Controller;
+import com.gen.maze.app.Controller;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -23,5 +23,9 @@ public class Main extends Application {
         stage.setScene(scene);
 
         stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }
