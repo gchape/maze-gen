@@ -16,25 +16,30 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class View {
-    private final AnchorPane mazeUIPane = new AnchorPane();
-    private final VBox userControlsPane = new VBox();
-    private final VBox algorithmsVBox = new VBox();
-    private final GridPane root = new GridPane();
     private final ChoiceBox<Integer> mazeGridDimChoiceBox = new ChoiceBox<>(FXCollections.observableList(List.of(20, 40)));
     private final Button algorithmBtnBinaryTree = new Button("\uD83C\uDF33 BinaryTree");
     private final Button algorithmBtnKruskal = new Button("\uD83C\uDF3F Kruskal's");
     private final Button algorithmBtnBacktracking = new Button("➰ Backtracking");
     private final CheckBox animationCheckBox = new CheckBox("On/Off");
+    private final Button resetMazeGridBtn = new Button("Reset");
+    private final AnchorPane mazeUIPane = new AnchorPane();
+    private final VBox userControlsPane = new VBox(15);
+    private final VBox algorithmsVBox = new VBox(8);
+    private final GridPane root = new GridPane();
 
     public View() {
-        userControlsPane.getStyleClass().add("vbox");
         mazeGridDimChoiceBox.setValue(20);
+        resetMazeGridBtn.setId("resetMazeGridBtn");
 
         initAlgorithmsVBox();
 
         root.addColumn(0, mazeUIPane);
         root.addColumn(1, userControlsPane);
-        userControlsPane.getChildren().addAll(new Label("[Choose grid size \uD83D\uDCAA]"), mazeGridDimChoiceBox, new Label("[Animate algs \uD83D\uDD27]"), animationCheckBox, algorithmsVBox);
+
+        userControlsPane.getChildren().addAll(
+                new VBox(3, new Label("[Choose grid size \uD83D\uDCAA]"), mazeGridDimChoiceBox),
+                new VBox(3, new Label("[Animate algs \uD83D\uDD27]"), animationCheckBox),
+                new VBox(3, new Label("[Reset maze \uD83D\uDD19]"), resetMazeGridBtn), algorithmsVBox);
     }
 
     private void initAlgorithmsVBox() {
@@ -45,10 +50,13 @@ public class View {
 
         algorithmsVBox.getStyleClass().add("algorithms-vbox");
 
-        algorithmsVBox.getChildren().addAll(new Label("[Choose maze algs \uD83D\uDE80]"), algorithmBtnBacktracking, algorithmBtnBinaryTree, algorithmBtnKruskal); // New Algorithm Button
+        algorithmsVBox.getChildren().addAll(
+                new Label("[Choose maze algs \uD83D\uDE80]"),
+                algorithmBtnBacktracking, algorithmBtnBinaryTree,
+                algorithmBtnKruskal); // New Algorithm Button
     }
 
-    protected void setOnButtonClicked(Consumer<MouseEvent> buttonConsumer) {
+    protected void setOnBtnAlgorithmsClicked(Consumer<MouseEvent> buttonConsumer) {
         algorithmBtnBacktracking.setOnMouseClicked(buttonConsumer::accept);
         algorithmBtnBinaryTree.setOnMouseClicked(buttonConsumer::accept);
         algorithmBtnKruskal.setOnMouseClicked(buttonConsumer::accept);
@@ -63,6 +71,10 @@ public class View {
         return root;
     }
 
+    protected void setOnBtnResetMazeGridClicked(Consumer<MouseEvent> consumer) {
+        resetMazeGridBtn.setOnMouseClicked(consumer::accept);
+    }
+
     protected ObjectProperty<Integer> choiceBoxValueProperty() {
         return mazeGridDimChoiceBox.valueProperty();
     }
@@ -71,11 +83,19 @@ public class View {
         return animationCheckBox.selectedProperty();
     }
 
-    public void disableAlgorithms(boolean predicate) {
-        algorithmsVBox.disableProperty().set(predicate);
+    protected BooleanProperty mazeGridResetBtnDisableProperty() {
+        return resetMazeGridBtn.disableProperty();
     }
 
-    public BooleanProperty animationDisableProperty() {
+    protected BooleanProperty animationDisableProperty() {
         return animationCheckBox.disableProperty();
+    }
+
+    protected BooleanProperty choiceBoxDisableProperty() {
+        return mazeGridDimChoiceBox.disableProperty();
+    }
+
+    protected BooleanProperty algorithmsVBoxDisableProperty() {
+        return algorithmsVBox.disableProperty();
     }
 }

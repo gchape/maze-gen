@@ -3,6 +3,8 @@ package com.gen.maze.app;
 import com.gen.maze.data.Tree;
 import com.gen.maze.data.UF;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
@@ -20,6 +22,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
+    private final BooleanProperty mazeGridResetBtnDisableProperty = new SimpleBooleanProperty(true);
+    private final BooleanProperty doesAlgorithmExecutedProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty animationDisableProperty = new SimpleBooleanProperty();
     private Thread algorithmThread;
     private final Model model;
     private final View view;
@@ -30,29 +35,37 @@ public class Controller {
         view = new View();
         model = new Model();
 
+        prepareBindings();
         setUpHandlers();
 
         drawMazeGrid(null, null, view.choiceBoxValueProperty().get());
     }
 
-    private void setUpHandlers() {
+    private void prepareBindings() {
         model.mazeGridDimProperty().bind(view.choiceBoxValueProperty());
 
+        animationDisableProperty.bind(view.choiceBoxValueProperty().isNotEqualTo(20).or(doesAlgorithmExecutedProperty));
+        view.mazeGridResetBtnDisableProperty().bind(mazeGridResetBtnDisableProperty);
+        mazeGridResetBtnDisableProperty.bind(doesAlgorithmExecutedProperty.not());
+        view.algorithmsVBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
+        view.choiceBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
+        view.animationDisableProperty().bind(animationDisableProperty);
+    }
+
+    private void setUpHandlers() {
+        view.setOnBtnResetMazeGridClicked((e) -> drawMazeGrid(null, null, view.choiceBoxValueProperty().get()));
         view.choiceBoxValueProperty().addListener(this::drawMazeGrid);
-        view.setOnButtonClicked(this::runAlgorithm);
+        view.setOnBtnAlgorithmsClicked(this::runAlgorithm);
     }
 
     private void drawMazeGrid(ObservableValue<? extends Number> o, Number _old, Number _new) {
-        view.animationDisableProperty().bind(view.choiceBoxValueProperty().isNotEqualTo(20));
         if (algorithmThread != null) algorithmThread.interrupt();
+        view.getMazeUIPane().getChildren().clear();
         view.animationCheckedProperty().set(false);
-        view.disableAlgorithms(false);
+        doesAlgorithmExecutedProperty.set(false);
         blob = null;
 
-        view.getMazeUIPane().getChildren().clear();
-
         cellDim = f(_new.intValue());
-
         model.buildTree();
         model.dfs(this::drawGrid);
     }
@@ -71,7 +84,7 @@ public class Controller {
             case "binaryTree" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
-                    view.disableAlgorithms(true);
+                    doesAlgorithmExecutedProperty.set(true);
                     binaryTree();
                     return null;
                 }
@@ -80,7 +93,7 @@ public class Controller {
             case "backtracking" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
-                    view.disableAlgorithms(true);
+                    doesAlgorithmExecutedProperty.set(true);
                     backtracking(new boolean[model.mazeGridDimProperty().get()][model.mazeGridDimProperty().get()], model.getTree().root());
                     return null;
                 }
@@ -89,11 +102,13 @@ public class Controller {
             case "kruskal" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
-                    view.disableAlgorithms(true);
+                    doesAlgorithmExecutedProperty.set(true);
                     kruskal();
                     return null;
                 }
             });
+
+            //TODO Prim and Aldous-Broder
         }
     }
 
@@ -118,8 +133,7 @@ public class Controller {
         walls.forEach(w -> {
             var sets = uf.find(w, Tree.Cell::new, cellDim);
             if (!sets[0].equals(sets[1])) {
-                animate(sets[1]);
-                Platform.runLater(() -> view.getMazeUIPane().getChildren().add(w));
+                animate(w);
                 uf.union(sets[0], sets[1]);
             }
         });
@@ -160,10 +174,9 @@ public class Controller {
 
         while (!stack.isEmpty()) {
             var currentCell = stack.pop();
+            var UN_ADJ = currentCell.getAdjacentCells().stream().filter(c -> !visited[c.Y()][c.X()]).toList();
 
             animate(currentCell);
-
-            var UN_ADJ = currentCell.getAdjacentCells().stream().filter(c -> !visited[c.Y()][c.X()]).toList();
 
             if (!UN_ADJ.isEmpty()) {
                 stack.push(currentCell);
@@ -174,6 +187,21 @@ public class Controller {
 
                 stack.push(chosenCell);
             }
+        }
+    }
+
+    private void animate(Line w) {
+        if (view.animationCheckedProperty().get() && view.choiceBoxValueProperty().get() == 20) {
+            w.setStyle("-fx-stroke: #ff3b2c");
+            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(w));
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine((int) w.getStartX(), (int) w.getStartY(), (int) w.getEndX(), (int) w.getEndY())));
+        } else {
+            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(w));
         }
     }
 

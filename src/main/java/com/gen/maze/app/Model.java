@@ -3,7 +3,10 @@ package com.gen.maze.app;
 import com.gen.maze.data.Tree;
 import javafx.beans.property.SimpleIntegerProperty;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
