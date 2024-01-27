@@ -7,7 +7,7 @@ import java.util.Objects;
 public class Tree {
     public static class Cell {
         private final int y, x;
-        private final List<Cell> adjacentCells;
+        private List<Cell> adjacentCells;
 
         public Cell(int y, int x) {
             this.y = y;
@@ -25,6 +25,10 @@ public class Tree {
 
         public List<Cell> getAdjacentCells() {
             return adjacentCells;
+        }
+
+        public void newAdjacentCellsList() {
+            adjacentCells = new ArrayList<>();
         }
 
         public boolean hasUp() {

@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 public class View {
     private final ChoiceBox<Integer> mazeGridDimChoiceBox = new ChoiceBox<>(FXCollections.observableList(List.of(20, 40)));
+    private final Button algorithmBtnAldousBroder = new Button("\uD83C\uDF00 Aldous-Broder");
     private final Button algorithmBtnBinaryTree = new Button("\uD83C\uDF33 BinaryTree");
     private final Button algorithmBtnKruskal = new Button("\uD83C\uDF3F Kruskal's");
     private final Button algorithmBtnBacktracking = new Button("➰ Backtracking");
@@ -46,17 +47,19 @@ public class View {
         algorithmBtnKruskal.setId("kruskal");
         algorithmBtnBinaryTree.setId("binaryTree");
         algorithmBtnBacktracking.setId("backtracking");
+        algorithmBtnAldousBroder.setId("aldous-broder");
         // New Algorithm Button
 
         algorithmsVBox.getStyleClass().add("algorithms-vbox");
 
         algorithmsVBox.getChildren().addAll(
                 new Label("[Choose maze algs \uD83D\uDE80]"),
-                algorithmBtnBacktracking, algorithmBtnBinaryTree,
-                algorithmBtnKruskal); // New Algorithm Button
+                algorithmBtnAldousBroder, algorithmBtnBacktracking,
+                algorithmBtnBinaryTree, algorithmBtnKruskal); // New Algorithm Button
     }
 
     protected void setOnBtnAlgorithmsClicked(Consumer<MouseEvent> buttonConsumer) {
+        algorithmBtnAldousBroder.setOnMouseClicked(buttonConsumer::accept);
         algorithmBtnBacktracking.setOnMouseClicked(buttonConsumer::accept);
         algorithmBtnBinaryTree.setOnMouseClicked(buttonConsumer::accept);
         algorithmBtnKruskal.setOnMouseClicked(buttonConsumer::accept);

@@ -108,7 +108,36 @@ public class Controller {
                 }
             });
 
-            //TODO Prim and Aldous-Broder
+            case "aldous-broder" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
+                @Override
+                protected Void call() {
+                    doesAlgorithmExecutedProperty.set(true);
+                    aldous_broder(new boolean[model.mazeGridDimProperty().get()][model.mazeGridDimProperty().get()], model.getTree().root());
+                    return null;
+                }
+            });
+
+            //TODO Prim
+        }
+    }
+
+    private void aldous_broder(boolean[][] visited, Tree.Cell current) {
+        int totalCells = visited.length * visited[0].length;
+        var random = new SecureRandom();
+        int visitedCells = 0;
+
+        visited[current.Y()][current.X()] = true;
+        while (visitedCells != totalCells) {
+            var ADJ = current.getAdjacentCells();
+            var chosen = ADJ.get(random.nextInt(ADJ.size()));
+
+            if (!visited[chosen.Y()][chosen.X()]) {
+                visitedCells++;
+                animate(current);
+                removeWall(current, chosen);
+                visited[chosen.Y()][chosen.X()] = true;
+            }
+            current = chosen;
         }
     }
 

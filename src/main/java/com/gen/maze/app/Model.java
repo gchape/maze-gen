@@ -7,7 +7,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class Model {
@@ -19,7 +18,7 @@ public class Model {
     }
 
     public void buildTree() {
-        tree.root().getAdjacentCells().clear();
+        tree.root().newAdjacentCellsList(); // O(1)
 
         var visited = new boolean[mazeGridDimProperty.get()][mazeGridDimProperty.get()];
         var states = new HashMap<String, Tree.Cell>();
@@ -32,21 +31,22 @@ public class Model {
             var c = stack.pop();
 
             if (!visited[c.Y()][c.X()]) {
-                var i = new AtomicInteger(0);
+                visited[c.Y()][c.X()] = true;
 
-                List.of(c.hasUp(), c.hasDown(mazeGridDimProperty.get()), c.hasRight(mazeGridDimProperty.get()), c.hasLeft()).forEach(w -> {
-                    if (w) switch (i.get()) {
+                List<Boolean> walks =
+                        List.of(c.hasUp(), c.hasDown(mazeGridDimProperty.get()), c.hasRight(mazeGridDimProperty.get()), c.hasLeft());
+                var i = 0;
+                for (var w : walks) {
+                    if (w) switch (i) {
                         case 0 -> act(states, c, c.Y() - 1, c.X());
                         case 1 -> act(states, c, c.Y() + 1, c.X());
                         case 2 -> act(states, c, c.Y(), c.X() + 1);
                         case 3 -> act(states, c, c.Y(), c.X() - 1);
                     }
-                    i.incrementAndGet();
-                });
+                    i++;
+                }
+                c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
             }
-
-            visited[c.Y()][c.X()] = true;
-            c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
         }
     }
 
@@ -71,11 +71,11 @@ public class Model {
         while (!stack.isEmpty()) {
             var c = stack.pop();
 
-            if (!visited[c.Y()][c.X()]) process.accept(c);
-
-            visited[c.Y()][c.X()] = true;
-
-            c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
+            if (!visited[c.Y()][c.X()]) {
+                process.accept(c);
+                visited[c.Y()][c.X()] = true;
+                c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
+            }
         }
     }
 
