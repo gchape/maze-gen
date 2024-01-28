@@ -34,10 +34,6 @@
     -fx-font-size: 12
 }
 
-#resetMazeGridBtn {
-    -fx-pref-width: 45;
-}
-
 .button:hover {
     -fx-background-color: orange;
 }

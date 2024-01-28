@@ -2,6 +2,7 @@ package com.gen.maze.app;
 
 import com.gen.maze.data.Tree;
 import com.gen.maze.data.UF;
+import com.gen.maze.data.Wall;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,8 +11,6 @@ import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 import java.security.SecureRandom;
@@ -19,7 +18,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller {
     private final BooleanProperty mazeGridResetBtnDisableProperty = new SimpleBooleanProperty(true);
@@ -41,46 +39,14 @@ public class Controller {
         drawMazeGrid(null, null, view.choiceBoxValueProperty().get());
     }
 
-    private void prepareBindings() {
-        model.mazeGridDimProperty().bind(view.choiceBoxValueProperty());
-
-        animationDisableProperty.bind(view.choiceBoxValueProperty().isNotEqualTo(20).or(doesAlgorithmExecutedProperty));
-        view.mazeGridResetBtnDisableProperty().bind(mazeGridResetBtnDisableProperty);
-        mazeGridResetBtnDisableProperty.bind(doesAlgorithmExecutedProperty.not());
-        view.algorithmsVBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
-        view.choiceBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
-        view.animationDisableProperty().bind(animationDisableProperty);
-    }
-
-    private void setUpHandlers() {
-        view.setOnBtnResetMazeGridClicked((e) -> drawMazeGrid(null, null, view.choiceBoxValueProperty().get()));
-        view.choiceBoxValueProperty().addListener(this::drawMazeGrid);
-        view.setOnBtnAlgorithmsClicked(this::runAlgorithm);
-    }
-
-    private void drawMazeGrid(ObservableValue<? extends Number> o, Number _old, Number _new) {
-        if (algorithmThread != null) algorithmThread.interrupt();
-        view.getMazeUIPane().getChildren().clear();
-        view.animationCheckedProperty().set(false);
-        doesAlgorithmExecutedProperty.set(false);
-        blob = null;
-
-        cellDim = f(_new.intValue());
-        model.buildTree();
-        model.dfs(this::drawGrid);
-    }
-
-    private void drawGrid(Tree.Cell currentCell) {
-        var rect = new Rectangle(currentCell.X() * cellDim, currentCell.Y() * cellDim, cellDim, cellDim);
-        rect.getStyleClass().add("rectangle");
-
-        view.getMazeUIPane().getChildren().add(rect);
+    public Region getView() {
+        return view.getRoot();
     }
 
     private void runAlgorithm(MouseEvent mouseEvent) {
-        Button dynamicButton = (Button) mouseEvent.getSource();
+        Button clickedBtn = (Button) mouseEvent.getSource();
 
-        switch (dynamicButton.getId()) {
+        switch (clickedBtn.getId()) {
             case "binaryTree" -> algorithmThread = Thread.ofPlatform().start(new Task<Void>() {
                 @Override
                 protected Void call() {
@@ -121,41 +87,116 @@ public class Controller {
         }
     }
 
-    private void aldous_broder(boolean[][] visited, Tree.Cell current) {
-        int totalCells = visited.length * visited[0].length;
-        var random = new SecureRandom();
-        int visitedCells = 0;
+    private void resetBtnClickEventTask(MouseEvent ignore) {
+        if (algorithmThread != null) algorithmThread.interrupt();
+        view.animationCheckedProperty().set(false);
+        doesAlgorithmExecutedProperty.set(false);
+        view.getMazeUIPane().getChildren().remove(blob);
+        view.getMazeUIPane().getChildren().add(view.getCanvas());
+        blob = null;
+    }
 
-        visited[current.Y()][current.X()] = true;
-        while (visitedCells != totalCells) {
-            var ADJ = current.getAdjacentCells();
-            var chosen = ADJ.get(random.nextInt(ADJ.size()));
+    private void drawMazeGrid(ObservableValue<? extends Number> o, Number oldV, Number newV) {
+        view.animationCheckedProperty().set(false);
+        doesAlgorithmExecutedProperty.set(false);
 
-            if (!visited[chosen.Y()][chosen.X()]) {
-                visitedCells++;
-                animate(current);
-                removeWall(current, chosen);
-                visited[chosen.Y()][chosen.X()] = true;
+        cellDim = f(newV.intValue());
+
+        view.getMazeUIPane().getChildren().clear();
+        model.buildTree();
+        model.dfs(this::drawRectangle);
+        view.getMazeUIPane().getChildren().add(view.getCanvas());
+    }
+
+    private void drawRectangle(Tree.Cell currentCell) {
+        var rect = new Rectangle(currentCell.X() * cellDim, currentCell.Y() * cellDim, cellDim, cellDim);
+        rect.getStyleClass().add("rectangle");
+
+        view.getMazeUIPane().getChildren().add(rect);
+    }
+
+    private void aldous_broder(boolean[][] visited, Tree.Cell curC) {
+        int tC = visited.length * visited[0].length; // totalCells
+        var r = new SecureRandom();
+        int vC = 0; // visitedCells
+
+        visited[curC.Y()][curC.X()] = true;
+        while (vC != tC) {
+            var ADJ = curC.getAdjacentCells();
+            var newC = ADJ.get(r.nextInt(ADJ.size()));
+
+            if (!visited[newC.Y()][newC.X()]) {
+                vC++;
+                animate(curC);
+                removeWall(curC, newC);
+                visited[newC.Y()][newC.X()] = true;
             }
-            current = chosen;
+            curC = newC;
         }
+    }
+
+    private void backtracking(boolean[][] visited, Tree.Cell c) {
+        var r = new SecureRandom();
+        var s = new ArrayDeque<Tree.Cell>();
+
+        s.push(c);
+        visited[c.Y()][c.X()] = true;
+
+        while (!s.isEmpty()) {
+            var curC = s.pop();
+            var UN_ADJ = curC.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).toList();
+
+            animate(curC);
+
+            if (!UN_ADJ.isEmpty()) {
+                s.push(curC);
+
+                var newC = UN_ADJ.get(r.nextInt(UN_ADJ.size()));
+                removeWall(curC, newC);
+                visited[newC.Y()][newC.X()] = true;
+
+                s.push(newC);
+            }
+        }
+    }
+
+    private void binaryTree() {
+        var r = new SecureRandom();
+
+        model.dfs(c -> {
+            animate(c);
+
+            boolean down = c.hasDown(model.mazeGridDimProperty().get());
+            boolean right = c.hasRight(model.mazeGridDimProperty().get());
+
+            var x = c.X() * cellDim;
+            var y = c.Y() * cellDim;
+
+            if (down && right) {
+                switch (r.nextInt(2)) {
+                    case 0 -> view.graphics().strokeLine(x, y + cellDim, x + cellDim, y + cellDim);
+                    case 1 -> view.graphics().strokeLine(x + cellDim, y, x + cellDim, y + cellDim);
+                }
+            } else if (down) view.graphics().strokeLine(x, y + cellDim, x + cellDim, y + cellDim);
+            else if (right) view.graphics().strokeLine(x + cellDim, y, x + cellDim, y + cellDim);
+        });
     }
 
     private void kruskal() {
         var uf = new UF<>();
-        var walls = new ArrayList<Line>();
+        var walls = new ArrayList<Wall>();
 
         model.dfs(c -> {
             uf.makeSet(c);
 
             var x = c.X() * cellDim;
             var y = c.Y() * cellDim;
-            if (c.hasUp()) walls.add(createLine(x, y, x + cellDim, y));
+            if (c.hasUp()) walls.add(new Wall(x, y, x + cellDim, y));
             if (c.hasDown(model.mazeGridDimProperty().get()))
-                walls.add(createLine(x, y + cellDim, x + cellDim, y + cellDim));
+                walls.add(new Wall(x, y + cellDim, x + cellDim, y + cellDim));
             if (c.hasRight(model.mazeGridDimProperty().get()))
-                walls.add(createLine(x + cellDim, y, x + cellDim, y + cellDim));
-            if (c.hasLeft()) walls.add(createLine(x, y, x, y + cellDim));
+                walls.add(new Wall(x + cellDim, y, x + cellDim, y + cellDim));
+            if (c.hasLeft()) walls.add(new Wall(x, y, x, y + cellDim));
         });
 
         Collections.shuffle(walls);
@@ -168,125 +209,52 @@ public class Controller {
         });
     }
 
-    private void binaryTree() {
-        var random = new SecureRandom();
+    private void removeWall(Tree.Cell c1, Tree.Cell c2) {
+        var x = c1.X() * cellDim;
+        var y = c1.Y() * cellDim;
 
-        model.dfs(c -> {
-            animate(c);
-
-            boolean hasDown = c.hasDown(model.mazeGridDimProperty().get());
-            boolean hasRight = c.hasRight(model.mazeGridDimProperty().get());
-
-            var x = c.X() * cellDim;
-            var y = c.Y() * cellDim;
-
-            if (hasDown && hasRight) {
-                switch (random.nextInt(2)) {
-                    case 0 ->
-                            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x, y + cellDim, x + cellDim, y + cellDim)));
-                    case 1 ->
-                            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x + cellDim, y, x + cellDim, y + cellDim)));
-                }
-            } else if (hasDown)
-                Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x, y + cellDim, x + cellDim, y + cellDim)));
-            else if (hasRight)
-                Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x + cellDim, y, x + cellDim, y + cellDim)));
-        });
-    }
-
-    private void backtracking(boolean[][] visited, Tree.Cell initial) {
-        var random = new SecureRandom();
-        var stack = new ArrayDeque<Tree.Cell>();
-
-        stack.push(initial);
-        visited[initial.Y()][initial.X()] = true;
-
-        while (!stack.isEmpty()) {
-            var currentCell = stack.pop();
-            var UN_ADJ = currentCell.getAdjacentCells().stream().filter(c -> !visited[c.Y()][c.X()]).toList();
-
-            animate(currentCell);
-
-            if (!UN_ADJ.isEmpty()) {
-                stack.push(currentCell);
-
-                var chosenCell = UN_ADJ.get(random.nextInt(UN_ADJ.size()));
-                removeWall(currentCell, chosenCell);
-                visited[chosenCell.Y()][chosenCell.X()] = true;
-
-                stack.push(chosenCell);
+        var i = 0;
+        for (var w : List.of(c1.Y() - 1 == c2.Y(), c1.Y() + 1 == c2.Y(), c1.X() + 1 == c2.X(), c1.X() - 1 == c2.X())) {
+            if (w) switch (i) {
+                case 0 -> view.graphics().strokeLine(x, y, x + cellDim, y);
+                case 1 -> view.graphics().strokeLine(x, y + cellDim, x + cellDim, y + cellDim);
+                case 2 -> view.graphics().strokeLine(x + cellDim, y, x + cellDim, y + cellDim);
+                case 3 -> view.graphics().strokeLine(x, y, x, y + cellDim);
             }
+            i++;
         }
     }
 
-    private void animate(Line w) {
+    private void animate(Tree.Cell c, boolean guard) {
+        if (guard) {
+            blob = new Rectangle(cellDim - 10, cellDim - 10);
+            blob.setStyle("-fx-stroke: #00ff38; -fx-fill: azure");
+            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(blob));
+        }
+        blob.setLayoutY(c.Y() * cellDim + 5);
+        blob.setLayoutX(c.X() * cellDim + 5);
+
+        try {
+            Thread.sleep(25);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void animate(Tree.Cell c) {
+        if (view.animationCheckedProperty().get() && view.choiceBoxValueProperty().get() == 20)
+            animate(c, blob == null);
+    }
+
+    private void animate(Wall w) {
         if (view.animationCheckedProperty().get() && view.choiceBoxValueProperty().get() == 20) {
-            w.setStyle("-fx-stroke: #ff3b2c");
-            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(w));
+            view.graphics().strokeLine(w.startX(), w.startY(), w.endX(), w.endY());
+
             try {
                 Thread.sleep(40);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException ignore) {
             }
-            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine((int) w.getStartX(), (int) w.getStartY(), (int) w.getEndX(), (int) w.getEndY())));
-        } else {
-            Platform.runLater(() -> view.getMazeUIPane().getChildren().add(w));
-        }
-    }
-
-    private void animate(Tree.Cell currentCell) {
-        if (view.animationCheckedProperty().get() && view.choiceBoxValueProperty().get() == 20) {
-            if (blob == null) {
-                blob = new Rectangle();
-                Platform.runLater(() -> view.getMazeUIPane().getChildren().add(blob));
-            }
-            blob.setLayoutY(currentCell.Y() * cellDim + 5);
-            blob.setLayoutX(currentCell.X() * cellDim + 5);
-            blob.setHeight(cellDim - 10);
-            blob.setWidth(cellDim - 10);
-            blob.setStroke(Color.BLUE);
-            blob.setFill(Color.RED);
-
-            try {
-                Thread.sleep(25);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void removeWall(Tree.Cell currentCell, Tree.Cell chosenCell) {
-        var x = currentCell.X() * cellDim;
-        var y = currentCell.Y() * cellDim;
-
-        var i = new AtomicInteger(0);
-
-        List.of(currentCell.Y() - 1 == chosenCell.Y(), currentCell.Y() + 1 == chosenCell.Y(), // UP, DOWN
-                currentCell.X() + 1 == chosenCell.X(), currentCell.X() - 1 == chosenCell.X() // RIGHT, LEFT
-        ).forEach(w -> {
-            if (w) switch (i.get()) {
-                case 0 -> // UP
-                        Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x, y, x + cellDim, y)));
-                case 1 -> // DOWN
-                        Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x, y + cellDim, x + cellDim, y + cellDim)));
-
-                case 2 -> // RIGHT
-                        Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x + cellDim, y, x + cellDim, y + cellDim)));
-
-                case 3 -> // LEFT
-                        Platform.runLater(() -> view.getMazeUIPane().getChildren().add(createLine(x, y, x, y + cellDim)));
-
-            }
-            i.set(i.get() + 1);
-        });
-    }
-
-    private Line createLine(int startX, int startY, int endX, int endY) {
-        var line = new Line(startX, startY, endX, endY);
-        line.setStrokeWidth(2.5);
-        line.setStroke(Color.WHITE);
-
-        return line;
+        } else view.graphics().strokeLine(w.startX(), w.startY(), w.endX(), w.endY());
     }
 
     private int f(int dim) {
@@ -298,7 +266,20 @@ public class Controller {
         };
     }
 
-    public Region getView() {
-        return view.getRoot();
+    private void setUpHandlers() {
+        view.setOnBtnResetMazeGridClicked(this::resetBtnClickEventTask);
+        view.choiceBoxValueProperty().addListener(this::drawMazeGrid);
+        view.setOnBtnAlgorithmsClicked(this::runAlgorithm);
+    }
+
+    private void prepareBindings() {
+        model.mazeGridDimProperty().bind(view.choiceBoxValueProperty());
+
+        animationDisableProperty.bind(view.choiceBoxValueProperty().isNotEqualTo(20).or(doesAlgorithmExecutedProperty));
+        view.mazeGridResetBtnDisableProperty().bind(mazeGridResetBtnDisableProperty);
+        mazeGridResetBtnDisableProperty.bind(doesAlgorithmExecutedProperty.not());
+        view.algorithmsVBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
+        view.choiceBoxDisableProperty().bind(doesAlgorithmExecutedProperty);
+        view.animationDisableProperty().bind(animationDisableProperty);
     }
 }

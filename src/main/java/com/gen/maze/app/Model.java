@@ -17,6 +17,39 @@ public class Model {
         tree = new Tree();
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
+    private void act(Map<String, Tree.Cell> states, Tree.Cell c, int y, int x) {
+        var state = states.get(y + "(,)" + x);
+        if (state == null) {
+            var cell = new Tree.Cell(y, x);
+
+            states.put(y + "(,)" + x, cell);
+            c.getAdjacentCells().add(cell);
+        } else {
+            c.getAdjacentCells().add(state);
+        }
+    }
+
+    public void dfs(Consumer<Tree.Cell> process) {
+        var stack = new ArrayDeque<Tree.Cell>();
+        var visited = new boolean[mazeGridDimProperty.get()][mazeGridDimProperty.get()];
+
+        stack.push(tree.root());
+
+        while (!stack.isEmpty()) {
+            var c = stack.pop();
+
+            if (!visited[c.Y()][c.X()]) {
+                process.accept(c);
+                visited[c.Y()][c.X()] = true;
+                c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
+            }
+        }
+    }
+
     public void buildTree() {
         tree.root().newAdjacentCellsList(); // O(1)
 
@@ -50,41 +83,8 @@ public class Model {
         }
     }
 
-    private void act(Map<String, Tree.Cell> states, Tree.Cell c, int y, int x) {
-        var state = states.get(y + "(,)" + x);
-        if (state == null) {
-            var cell = new Tree.Cell(y, x);
-
-            states.put(y + "(,)" + x, cell);
-            c.getAdjacentCells().add(cell);
-        } else {
-            c.getAdjacentCells().add(state);
-        }
-    }
-
-    public void dfs(Consumer<Tree.Cell> process) {
-        var stack = new ArrayDeque<Tree.Cell>();
-        var visited = new boolean[mazeGridDimProperty.get()][mazeGridDimProperty.get()];
-
-        stack.push(tree.root());
-
-        while (!stack.isEmpty()) {
-            var c = stack.pop();
-
-            if (!visited[c.Y()][c.X()]) {
-                process.accept(c);
-                visited[c.Y()][c.X()] = true;
-                c.getAdjacentCells().stream().filter(c_ -> !visited[c_.Y()][c_.X()]).forEach(stack::push);
-            }
-        }
-    }
-
     public SimpleIntegerProperty mazeGridDimProperty() {
         return mazeGridDimProperty;
-    }
-
-    public Tree getTree() {
-        return tree;
     }
 }
 
