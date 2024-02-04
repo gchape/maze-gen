@@ -12,8 +12,8 @@ import java.util.Objects;
 public class Main extends Application {
     @Override
     public void start(Stage stage) {
-        stage.setOnCloseRequest((e) -> System.exit(0));
         stage.initStyle(StageStyle.DECORATED);
+        stage.setOnCloseRequest((e) -> System.exit(0));
         stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("/appIcon.png")).toExternalForm()));
         stage.setTitle("Perfect Mazes (gchapidze)");
         stage.setResizable(false);
