@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class Tree {
-    public static class Cell {
+    public static final class Cell {
         private final int y, x;
-        private List<Cell> adjacentCells;
+        private final List<Cell> adjacentCells;
 
         public Cell(int y, int x) {
             this.y = y;
@@ -27,10 +27,6 @@ public class Tree {
             return adjacentCells;
         }
 
-        public void newAdjacentCellsList() {
-            adjacentCells = new ArrayList<>();
-        }
-
         public boolean hasUp() {
             return y - 1 >= 0;
         }
@@ -45,6 +41,18 @@ public class Tree {
 
         public boolean hasLeft() {
             return x - 1 >= 0;
+        }
+
+        public boolean isUpOf(Cell c1) {
+            return Y() + 1 == c1.Y();
+        }
+
+        public boolean isDownOf(Cell c1) {
+            return Y() - 1 == c1.Y();
+        }
+
+        public boolean isRightOf(Cell c1) {
+            return X() - 1 == c1.X();
         }
 
         @Override
