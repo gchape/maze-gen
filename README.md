@@ -14,7 +14,7 @@ This project provides a JavaFX user interface for visualizing maze generation al
    
 2. Run the executable JAR file:
    ```bash
-   java -jar mazed-<version>.jar
+   java -jar maze-gen-<version>.jar
 
 4. Select the desired maze generation algorithm and grid size from the UI.
 5. Explore the generated maze and visualize the maze generation process.
